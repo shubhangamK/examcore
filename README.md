@@ -8,6 +8,7 @@ Backend service for an online competitive exam platform, similar to GATE/JEE. Bu
 - Spring Boot 3.5.12
 - MongoDB
 - Spring Security + JWT
+- BCrypt password hashing
 - Maven
 
 ## Project Status
@@ -15,7 +16,7 @@ Backend service for an online competitive exam platform, similar to GATE/JEE. Bu
 | Phase | Description | Status |
 |-------|-------------|--------|
 | Phase 1 | Setup and project initialization | Complete |
-| Phase 2 | User authentication (Register, Login, JWT) | In progress |
+| Phase 2 | User authentication (Register, Login, JWT) | In Progress |
 | Phase 3 | Question bank module | Pending |
 | Phase 4 | Exam engine | Pending |
 | Phase 5 | Results and analytics | Pending |
@@ -37,22 +38,46 @@ examcore (Spring Boot - localhost:8080)
 MongoDB  (localhost:27017)
 ```
 
-The application follows a strict layered architecture:
-
+Layered architecture:
 ```
 Controller -> Service -> ServiceImpl -> Repository -> MongoDB
 ```
 
 ## API Endpoints
 
-### Authentication (Phase 2 - In Progress)
+### Authentication
 
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|---------------|
 | POST | /api/auth/register | Register new user | No |
 | POST | /api/auth/login | Login, returns JWT token | No |
 
-More endpoints will be added as each phase is completed.
+#### Register Request
+```json
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "password123",
+  "role": "STUDENT"
+}
+```
+
+#### Login Request
+```json
+{
+  "email": "john@example.com",
+  "password": "password123"
+}
+```
+
+#### Login Response
+```json
+{
+  "token": "JWT_TOKEN",
+  "email": "john@example.com",
+  "role": "STUDENT"
+}
+```
 
 ## Getting Started
 
@@ -88,14 +113,24 @@ Application starts on port 8080.
 ```
 src/main/java/com/shubhangam/examcore/
 ├── controller/
+│   └── AuthController.java
 ├── dto/
 │   ├── request/
+│   │   ├── RegisterRequest.java
+│   │   └── LoginRequest.java
 │   └── response/
+│       └── AuthResponse.java
 ├── entity/
+│   ├── User.java
+│   └── Role.java
 ├── repository/
+│   └── UserRepository.java
 ├── service/
+│   └── AuthService.java
 ├── serviceImpl/
+│   └── AuthServiceImpl.java
 ├── config/
+│   └── SecurityConfig.java
 ├── security/
 └── ExamcoreApplication.java
 ```
