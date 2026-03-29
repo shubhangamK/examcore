@@ -4,6 +4,7 @@ import com.shubhangam.examcore.dto.request.LoginRequest;
 import com.shubhangam.examcore.dto.request.RegisterRequest;
 import com.shubhangam.examcore.dto.response.AuthResponse;
 import com.shubhangam.examcore.entity.User;
+import com.shubhangam.examcore.security.JwtUtil;
 import com.shubhangam.examcore.service.AuthService;
 import com.shubhangam.examcore.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,10 +17,12 @@ public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
     private  final PasswordEncoder passwordEncoder ;
+    private final JwtUtil jwtUtil;
 
-    public AuthServiceImpl(UserRepository userRepository ,  PasswordEncoder passwordEncoder) {
+    public AuthServiceImpl(UserRepository userRepository ,  PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
     }
 
     @Override
@@ -45,15 +48,16 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthResponse login(LoginRequest loginRequest) {
-        String token = "dummy-token_" + loginRequest.getEmail();
         Optional<User> existingUser = userRepository.findByEmail(loginRequest.getEmail());
         if(existingUser.isEmpty()){
             throw new RuntimeException("No User exist");
         }
         User user = existingUser.get();
+
         if(!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())){
             throw new RuntimeException("Password doesnot match");
         }
+        String token = jwtUtil.generateToken(user.getEmail() , user.getRole().name());
         return new AuthResponse( user.getRole() , user.getEmail(),token);
     }
 }
