@@ -7,7 +7,7 @@ Backend service for an online competitive exam platform, similar to GATE/JEE. Bu
 - Java 17
 - Spring Boot 3.5.12
 - MongoDB
-- Spring Security + JWT
+- Spring Security + JWT (JJWT 0.12.3)
 - BCrypt password hashing
 - Maven
 
@@ -16,7 +16,7 @@ Backend service for an online competitive exam platform, similar to GATE/JEE. Bu
 | Phase | Description | Status |
 |-------|-------------|--------|
 | Phase 1 | Setup and project initialization | Complete |
-| Phase 2 | User authentication (Register, Login, JWT) | In Progress |
+| Phase 2 | User authentication (Register, Login, JWT) | Complete |
 | Phase 3 | Question bank module | Pending |
 | Phase 4 | Exam engine | Pending |
 | Phase 5 | Results and analytics | Pending |
@@ -27,9 +27,9 @@ Backend service for an online competitive exam platform, similar to GATE/JEE. Bu
 ## Architecture
 
 ```
-examweb (React - localhost:3000)
+examweb (React/Vite - localhost:5173)
          |
-         | REST APIs
+         | REST APIs + JWT Token
          |
 examcore (Spring Boot - localhost:8080)
          |
@@ -47,10 +47,10 @@ Controller -> Service -> ServiceImpl -> Repository -> MongoDB
 
 ### Authentication
 
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|---------------|
-| POST | /api/auth/register | Register new user | No |
-| POST | /api/auth/login | Login, returns JWT token | No |
+| Method | Endpoint | Description | Auth | Status |
+|--------|----------|-------------|------|--------|
+| POST | /api/auth/register | Register new user | No | 201 Created |
+| POST | /api/auth/login | Login, returns JWT | No | 200 OK |
 
 #### Register Request
 ```json
@@ -73,9 +73,17 @@ Controller -> Service -> ServiceImpl -> Repository -> MongoDB
 #### Login Response
 ```json
 {
-  "token": "JWT_TOKEN",
+  "token": "eyJhbGciOiJIUzM4NCJ9...",
   "email": "john@example.com",
   "role": "STUDENT"
+}
+```
+
+#### Validation Error Response (400)
+```json
+{
+  "email": "Invalid Email Format",
+  "password": "Password Must be at Least 6 characters"
 }
 ```
 
@@ -130,8 +138,11 @@ src/main/java/com/shubhangam/examcore/
 ├── serviceImpl/
 │   └── AuthServiceImpl.java
 ├── config/
-│   └── SecurityConfig.java
+│   ├── SecurityConfig.java
+│   ├── CorsConfig.java
+│   └── GlobalExceptionHandler.java
 ├── security/
+│   └── JwtUtil.java
 └── ExamcoreApplication.java
 ```
 
