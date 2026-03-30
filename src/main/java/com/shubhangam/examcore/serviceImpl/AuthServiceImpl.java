@@ -26,7 +26,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public String register(RegisterRequest registerRequest) {
+    public AuthResponse register(RegisterRequest registerRequest) {
         String email = registerRequest.getEmail();
         Optional<User> existingUser = userRepository.findByEmail(email);
         if(existingUser.isPresent()){
@@ -43,7 +43,8 @@ public class AuthServiceImpl implements AuthService {
                 .role(registerRequest.getRole())
                 .build();
         userRepository.save(user);
-        return "user Register Successfully";
+        String token = jwtUtil.generateToken(user.getEmail() , user.getRole().name());
+        return new AuthResponse( user.getRole(), user.getEmail(), token);
     }
 
     @Override
@@ -55,7 +56,7 @@ public class AuthServiceImpl implements AuthService {
         User user = existingUser.get();
 
         if(!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())){
-            throw new RuntimeException("Password doesnot match");
+            throw new RuntimeException("Password does not match");
         }
         String token = jwtUtil.generateToken(user.getEmail() , user.getRole().name());
         return new AuthResponse( user.getRole() , user.getEmail(),token);
