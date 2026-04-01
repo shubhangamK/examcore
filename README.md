@@ -1,7 +1,7 @@
 # examcore
 
 Backend service for an online competitive exam platform, similar to GATE/JEE. Built with Java, Spring Boot, and MongoDB.
-
+ 
 ## Tech Stack
 
 - Java 17
